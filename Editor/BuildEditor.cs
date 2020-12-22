@@ -229,7 +229,7 @@ namespace Exodrifter.Duplicator
 
 		#region Menu Items
 
-		[MenuItem("Util/Build/Build Defaults", false, 0)]
+		[MenuItem("Tools/Build/Build Defaults", false, 0)]
 		public static void BuildDefaults()
 		{
 			var configs = BuildUtil.LoadSettings();
@@ -243,13 +243,13 @@ namespace Exodrifter.Duplicator
 			}
 		}
 
-		[MenuItem("Util/Build/Open Build Folder", false, 1)]
+		[MenuItem("Tools/Build/Open Build Folder", false, 1)]
 		public static void OpenBuildFolder()
 		{
 			Process.Start("file://" + BuildUtil.GetBuildPath());
 		}
 
-		[MenuItem("Util/Build/Settings", false, 2)]
+		[MenuItem("Tools/Build/Settings", false, 2)]
 		public static void OpenSettingsWindow()
 		{
 			var window = GetWindow<BuildEditor>();

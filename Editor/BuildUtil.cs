@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace Exodrifter.Anchor.Editor
+namespace Exodrifter.Duplicator
 {
 	public static class BuildUtil
 	{

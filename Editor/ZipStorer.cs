@@ -26,7 +26,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace Exodrifter.Anchor
+namespace Exodrifter.Duplicator
 {
 	/// <summary>
 	/// Unique class for compression/decompression file. Represents a Zip file.

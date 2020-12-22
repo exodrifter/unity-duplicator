@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEditor;
 
-namespace Exodrifter.Anchor.Editor
+namespace Exodrifter.Duplicator
 {
 	[Serializable]
 	public class BuildConfig

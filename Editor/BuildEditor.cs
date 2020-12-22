@@ -6,7 +6,7 @@ using UnityEditor.Callbacks;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace Exodrifter.Anchor.Editor
+namespace Exodrifter.Duplicator
 {
 	public class BuildEditor : EditorWindow
 	{

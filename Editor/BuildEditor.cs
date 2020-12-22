@@ -40,6 +40,8 @@ namespace Exodrifter.Duplicator
 
 		private void OnGUI()
 		{
+			EditorGUI.BeginChangeCheck();
+
 			EditorGUILayout.BeginVertical();
 			EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
 			leftPos = EditorGUILayout.BeginScrollView(leftPos, GUILayout.Width(250));
@@ -104,7 +106,7 @@ namespace Exodrifter.Duplicator
 
 			EditorGUILayout.EndVertical();
 
-			if (GUI.changed)
+			if (EditorGUI.EndChangeCheck())
 			{
 				configs = (List<BuildConfig>)list.list;
 				BuildUtil.SaveSettings(configs);

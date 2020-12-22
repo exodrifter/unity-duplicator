@@ -172,6 +172,20 @@ namespace Exodrifter.Duplicator
 
 #region Settings
 
+		/// <summary>
+		/// This intermediate class exists because Unity does not know how to
+		/// serialize a top-level JSON array.
+		/// </summary>
+		private struct Configs
+		{
+			public List<BuildConfig> configs;
+
+			public Configs(List<BuildConfig> configs)
+			{
+				this.configs = configs;
+			}
+		}
+
 		public static List<BuildConfig> LoadSettings()
 		{
 			var path = GetSettingsPath();
@@ -183,7 +197,7 @@ namespace Exodrifter.Duplicator
 			try
 			{
 				var json = File.ReadAllText(path);
-				return JsonUtility.FromJson<List<BuildConfig>>(json);
+				return JsonUtility.FromJson<Configs>(json).configs;
 			}
 			catch (Exception e)
 			{
@@ -202,7 +216,7 @@ namespace Exodrifter.Duplicator
 
 			try
 			{
-				var json = JsonUtility.ToJson(configs, true);
+				var json = JsonUtility.ToJson(new Configs(configs), true);
 				Directory.CreateDirectory(Path.GetDirectoryName(path));
 				File.WriteAllText(path, json);
 			}

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEditor;
 using UnityEditor.Callbacks;
@@ -39,20 +40,20 @@ namespace Exodrifter.Anchor.Editor
 
 		private void OnGUI()
 		{
-			XGUI.BeginVertical();
-			XGUI.BeginHorizontal(XGUI.ExpandHeight(true));
-			XGUI.BeginScrollView(ref leftPos, XGUI.Width(250));
+			EditorGUILayout.BeginVertical();
+			EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
+			leftPos = EditorGUILayout.BeginScrollView(leftPos, GUILayout.Width(250));
 
 			if (list == null)
 			{
 				list = new ReorderableList(configs, typeof(BuildConfig));
 				list.drawHeaderCallback += (rect) =>
 				{
-					XGUI.Label(rect, "Build Configs");
+					GUI.Label(rect, "Build Configs");
 				};
 				list.drawElementCallback += (rect, index, active, focused) =>
 				{
-					XGUI.Label(rect, configs[index].folder);
+					GUI.Label(rect, ((BuildConfig)list.list[index]).folder);
 				};
 				list.onAddCallback += (list) =>
 				{
@@ -63,17 +64,17 @@ namespace Exodrifter.Anchor.Editor
 			}
 			list.DoLayoutList();
 
-			if (XGUI.Button("Build Defaults"))
+			if (GUILayout.Button("Build Defaults"))
 			{
 				BuildDefaults();
 			}
-			if (XGUI.Button("Open Build Folder"))
+			if (GUILayout.Button("Open Build Folder"))
 			{
 				OpenBuildFolder();
 			}
 
-			XGUI.EndScrollView();
-			XGUI.BeginScrollView(ref rightPos);
+			GUILayout.EndScrollView();
+			rightPos = GUILayout.BeginScrollView(rightPos);
 
 			if (list.index >= 0)
 			{
@@ -82,38 +83,41 @@ namespace Exodrifter.Anchor.Editor
 			}
 			else
 			{
-				XGUI.enabled = false;
-				XGUI.BeginHorizontal();
-				XGUI.FlexibleSpace();
-				XGUI.BeginVertical();
-				XGUI.Space(20);
-				XGUI.Label("No build selected");
-				XGUI.EndVertical();
-				XGUI.FlexibleSpace();
-				XGUI.EndHorizontal();
-				XGUI.enabled = true;
+				GUI.enabled = false;
+				EditorGUILayout.BeginHorizontal();
+				GUILayout.FlexibleSpace();
+				EditorGUILayout.BeginVertical();
+				EditorGUILayout.Space(20);
+				GUILayout.Label("No build selected");
+				EditorGUILayout.EndVertical();
+				GUILayout.FlexibleSpace();
+				EditorGUILayout.EndHorizontal();
+				GUI.enabled = true;
 			}
 
-			XGUI.EndScrollView();
-			XGUI.EndHorizontal();
+			EditorGUILayout.EndScrollView();
+			EditorGUILayout.EndHorizontal();
 
-			XGUI.enabled = false;
-			XGUI.Label(BuildUtil.GetSettingsPath());
-			XGUI.enabled = true;
+			GUI.enabled = false;
+			GUILayout.Label(BuildUtil.GetSettingsPath());
+			GUI.enabled = true;
 
-			XGUI.EndVertical();
+			EditorGUILayout.EndVertical();
 
-			if (XGUI.changed)
+			if (GUI.changed)
 			{
 				configs = (List<BuildConfig>)list.list;
 				BuildUtil.SaveSettings(configs);
 			}
-
-			XGUI.Reset();
 		}
 
 		private void DrawConfig(BuildConfig config)
 		{
+			if (config == null)
+			{
+				throw new ArgumentNullException(nameof(config));
+			}
+
 			var targetSupported = BuildUtil.IsTargetSupported(config.target);
 			if (!targetSupported && config.target != 0)
 			{
@@ -121,23 +125,23 @@ namespace Exodrifter.Anchor.Editor
 					"Build module for {0} is not installed!",
 					config.target
 				);
-				XGUI.HelpBox(message, MessageType.Warning);
+				EditorGUILayout.HelpBox(message, MessageType.Warning);
 			}
 
-			XGUI.enabled = targetSupported;
-			if (XGUI.Button(XGUI.Content("Build")))
+			GUI.enabled = targetSupported;
+			if (GUILayout.Button(new GUIContent("Build")))
 			{
 				EditorApplication.delayCall += () =>
 					BuildUtil.Build((BuildConfig)list.list[list.index]);
 			}
-			XGUI.enabled = true;
+			GUI.enabled = true;
 
-			XGUI.TextField("Folder", ref config.folder);
-			XGUI.TextField("Exe Name", ref config.exeName);
-			XGUI.Toggle("Default Build", ref config.defaultBuild);
-			config.target = (BuildTarget)XGUI.EnumPopup("Target Platform", config.target);
+			config.folder = EditorGUILayout.TextField("Folder", config.folder);
+			config.exeName = EditorGUILayout.TextField("Exe Name", config.exeName);
+			config.defaultBuild = EditorGUILayout.Toggle("Default Build", config.defaultBuild);
+			config.target = (BuildTarget)EditorGUILayout.EnumPopup("Target Platform", config.target);
 
-			options = XGUI.Foldout(options, "Build Options");
+			options = EditorGUILayout.Foldout(options, "Build Options");
 			if (options)
 			{
 				DrawBuildOptions(config);
@@ -199,7 +203,7 @@ namespace Exodrifter.Anchor.Editor
 		private void DrawBuildOption(BuildConfig config, BuildOptions option, string label)
 		{
 			var value = (config.options & option) > 0;
-			XGUI.ToggleLeft(label, ref value);
+			value = EditorGUILayout.ToggleLeft(label, value);
 
 			if (value)
 			{
@@ -213,12 +217,12 @@ namespace Exodrifter.Anchor.Editor
 
 		private void DrawBuildInfo(string info)
 		{
-			XGUI.BeginHorizontal();
-			XGUI.Space(20);
-			XGUI.enabled = false;
-			XGUI.LabelField(info);
-			XGUI.enabled = true;
-			XGUI.EndHorizontal();
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.Space(20);
+			GUI.enabled = false;
+			EditorGUILayout.LabelField(info);
+			GUI.enabled = true;
+			EditorGUILayout.EndHorizontal();
 		}
 
 		#region Menu Items

@@ -220,7 +220,7 @@ namespace Exodrifter.Duplicator
 		private void DrawBuildInfo(string info)
 		{
 			EditorGUILayout.BeginHorizontal();
-			EditorGUILayout.Space(20);
+			EditorGUILayout.Space(20, false);
 			GUI.enabled = false;
 			EditorGUILayout.LabelField(info);
 			GUI.enabled = true;

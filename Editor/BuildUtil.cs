@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ICSharpCode.SharpZipLib.GZip;
+using ICSharpCode.SharpZipLib.Tar;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -92,27 +94,26 @@ namespace Exodrifter.Duplicator
 				return;
 			}
 
-			// Zip the build
-			var zipFilename = path + ".zip";
-			if (File.Exists(zipFilename))
-			{
-				File.Delete(zipFilename);
-			}
-
+			// Compress the build
 			try
 			{
-				using (var zip = ZipStorer.Create(zipFilename, ""))
+				switch (config.target)
 				{
-					switch (config.target)
-					{
-						case BuildTarget.WebGL:
+					case BuildTarget.WebGL:
+						var zipFilename = path + ".zip";
+						if (File.Exists(zipFilename))
+						{
+							File.Delete(zipFilename);
+						}
+
+						using (var zip = ZipStorer.Create(zipFilename))
+						{
 							var directories = Directory.GetDirectories(options.locationPathName);
 							foreach (var directory in directories)
 							{
 								zip.AddDirectory(
 									ZipStorer.Compression.Deflate,
-									directory,
-									Path.GetFileName(directory)
+									directory, ""
 								);
 							}
 
@@ -125,16 +126,41 @@ namespace Exodrifter.Duplicator
 									Path.GetFileName(file)
 								);
 							}
-							break;
+						}
+						break;
 
-						default:
+					case BuildTarget.StandaloneWindows:
+					case BuildTarget.StandaloneWindows64:
+						var zf = path + ".zip";
+						if (File.Exists(zf))
+						{
+							File.Delete(zf);
+						}
+
+						using (var zip = ZipStorer.Create(zf))
+						{
 							zip.AddDirectory(
 								ZipStorer.Compression.Deflate,
-								path,
-								PlayerSettings.productName
+								path, ""
 							);
-							break;
-					}
+						}
+						break;
+
+					default:
+						var archivePath = path + ".tar.gz";
+						if (File.Exists(archivePath))
+						{
+							File.Delete(archivePath);
+						}
+
+						using (var stream = new GZipOutputStream(File.Create(archivePath)))
+						{
+							using (var archive = TarArchive.CreateOutputTarArchive(stream, TarBuffer.DefaultBlockFactor))
+							{
+								TarCompress(new DirectoryInfo(path), archive);
+							}
+						}
+						break;
 				}
 			}
 			catch (Exception e)
@@ -142,9 +168,22 @@ namespace Exodrifter.Duplicator
 				Debug.LogError(string.Format(
 					"Failed to zip {0}; {1}",
 					config.folder, e));
-
-				File.Delete(zipFilename);
 				return;
+			}
+		}
+
+		private static void TarCompress(DirectoryInfo directory, TarArchive archive)
+		{
+			foreach (FileInfo fileToBeTarred in directory.GetFiles())
+			{
+				var entry = TarEntry.CreateEntryFromFile(fileToBeTarred.FullName);
+				entry.TarHeader.Name = entry.TarHeader.Name.Substring("Builds/".Length);
+				archive.WriteEntry(entry, true);
+			}
+
+			foreach (var d in directory.GetDirectories())
+			{
+				TarCompress(d, archive);
 			}
 		}
 

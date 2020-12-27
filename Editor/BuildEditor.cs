@@ -139,9 +139,32 @@ namespace Exodrifter.Duplicator
 			GUI.enabled = true;
 
 			config.folder = EditorGUILayout.TextField("Folder", config.folder);
-			config.exeName = EditorGUILayout.TextField("Exe Name", config.exeName);
-			config.defaultBuild = EditorGUILayout.Toggle("Default Build", config.defaultBuild);
+
+			EditorGUILayout.Space();
+
 			config.target = (BuildTarget)EditorGUILayout.EnumPopup("Target Platform", config.target);
+			EditorGUILayout.BeginHorizontal();
+			switch (config.target)
+			{
+				// Web builds do not have an exe name; Unity will always use the
+				// name index.html
+				case BuildTarget.WebGL:
+					GUI.enabled = false;
+					EditorGUILayout.TextField("Exe Name", "index");
+					GUILayout.Label(".html", GUILayout.Width(50));
+					GUI.enabled = true;
+					break;
+
+				default:
+					config.exeName = EditorGUILayout.TextField("Exe Name", config.exeName);
+					GUILayout.Label(
+						BuildUtil.GetExeFiletype(config.target),
+						GUILayout.Width(50)
+					);
+					break;
+			}
+			EditorGUILayout.EndHorizontal();
+			config.defaultBuild = EditorGUILayout.Toggle("Default Build", config.defaultBuild);
 
 			options = EditorGUILayout.Foldout(options, "Build Options");
 			if (options)

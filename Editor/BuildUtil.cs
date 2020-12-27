@@ -206,27 +206,32 @@ namespace Exodrifter.Duplicator
 
 		private static string GetExeFilename(string exeName, BuildTarget target)
 		{
+			return Path.ChangeExtension(exeName, GetExeFiletype(target));
+		}
+
+		public static string GetExeFiletype(BuildTarget target)
+		{
 			switch (target)
 			{
-				default:
-					throw new ArgumentException("Unknown target " + target);
 				case BuildTarget.Android:
-					return Path.ChangeExtension(exeName, "apk");
+					return ".apk";
 				case BuildTarget.StandaloneWindows:
 				case BuildTarget.StandaloneWindows64:
-					return Path.ChangeExtension(exeName, "exe");
+					return ".exe";
 				case BuildTarget.StandaloneOSX:
-					return Path.ChangeExtension(exeName, "app");
+					return ".app";
 				case BuildTarget.StandaloneLinux64:
-					return Path.ChangeExtension(exeName, "x86_64");
+					return ".x86_64";
 				case BuildTarget.WebGL:
-					return exeName;
+					return ".html";
+				default:
+					throw new ArgumentException("Unknown target " + target);
 			}
 		}
 
 		#endregion
 
-#region Settings
+		#region Settings
 
 		/// <summary>
 		/// This intermediate class exists because Unity does not know how to

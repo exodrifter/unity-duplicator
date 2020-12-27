@@ -75,8 +75,21 @@ namespace Exodrifter.Duplicator
 			var options = new BuildPlayerOptions();
 			options.target = config.target;
 			options.scenes = EditorBuildSettings.scenes.Select(x => x.path).ToArray();
-			options.locationPathName = Path.Combine(path,
-				GetExeFilename(config.exeName, config.target));
+
+			switch (config.target)
+			{
+				// The WebGL build treats the locationPathName as the folder the
+				// build will be generated in instead of the name of the
+				// executable, which will always be index.html
+				case BuildTarget.WebGL:
+					options.locationPathName = path;
+					break;
+
+				default:
+					options.locationPathName = Path.Combine(path,
+						GetExeFilename(config.exeName, config.target));
+				break;
+			}
 
 			try
 			{
@@ -99,6 +112,10 @@ namespace Exodrifter.Duplicator
 			{
 				switch (config.target)
 				{
+					// Instead of zipping the entire folder, zip each item in
+					// the folder instead for the Web build. This is because
+					// itch.io expects the index.html file to be in the root
+					// directory of the zipped build.
 					case BuildTarget.WebGL:
 						var zipFilename = path + ".zip";
 						if (File.Exists(zipFilename))
@@ -108,7 +125,7 @@ namespace Exodrifter.Duplicator
 
 						using (var zip = ZipStorer.Create(zipFilename))
 						{
-							var directories = Directory.GetDirectories(options.locationPathName);
+							var directories = Directory.GetDirectories(path);
 							foreach (var directory in directories)
 							{
 								zip.AddDirectory(
@@ -117,7 +134,7 @@ namespace Exodrifter.Duplicator
 								);
 							}
 
-							var files = Directory.GetFiles(options.locationPathName);
+							var files = Directory.GetFiles(path);
 							foreach (var file in files)
 							{
 								zip.AddFile(
